@@ -1,0 +1,32 @@
+#
+# cleanup.yml
+# Delete excess files off the WebDAV server
+#
+
+name: Cleanup
+
+on:
+  push:
+    branches:
+    - bugfix-2.0.x
+    paths-ignore:
+    - config/**
+    - data/**
+    - docs/**
+    - '**/*.md'
+
+jobs:
+  clean_up:
+    name: Clean up excess FWs
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clean up excess FW files
+      uses: JaxTheWolf/webdav-watcher@main
+      with:
+        dav_server: ${{ secrets.DAV_SERVER }}
+        dav_user: ${{ secrets.DAV_USER }}
+        dav_pass: ${{ secrets.DAV_PASS }}
+        path: ${{ secrets.PATH }}
+        to_keep: ${{ secrets.TO_KEEP }}

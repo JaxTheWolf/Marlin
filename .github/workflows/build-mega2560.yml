@@ -1,0 +1,54 @@
+#
+# build-mega2560.yml
+# Build and push the fw to a WebDAV server
+#
+
+name: Build
+
+on:
+  push:
+    branches:
+    - bugfix-2.0.x
+    paths-ignore:
+    - config/**
+    - data/**
+    - docs/**
+    - '**/*.md'
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Thing'
+        required: false
+
+jobs:
+  build_fw:
+    name: Build for mega2560
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Setup timezone
+      uses: zcong1993/setup-timezone@master
+      with:
+        timezone: Europe/Prague
+
+    - name: Pull the repo
+      uses: actions/checkout@v2
+      with:
+        ref: bugfix-2.0.x
+
+    - name: Select Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7' # Version range or exact version of a Python version to use, using semvers version range syntax.
+        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+
+    - name: Install PlatformIO
+      run: |
+        pip install -U https://github.com/platformio/platformio-core/archive/develop.zip
+        platformio update
+
+    - name: Run ${{ matrix.test-platform }} Build
+      run: |
+        pio run
+        curl --user '${{ secrets.DAV_USER }}:${{ secrets.DAV_PASS }}' -T '.pio/build/mega2560/firmware.hex' "https://nextcloud.awooo.space/remote.php/dav/files/${{ secrets.DAV_USER }}/MarlinBuilds/firmware_`date +%d_%m_%H_%M`.hex" --anyauth

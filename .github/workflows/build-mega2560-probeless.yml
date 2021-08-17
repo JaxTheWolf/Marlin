@@ -51,4 +51,6 @@ jobs:
     - name: Run ${{ matrix.test-platform }} Build
       run: |
         pio run
+    - name: Upload the fw    
+      run: |
         curl --user "${{ secrets.DAV_USER }}:${{ secrets.DAV_PASS }}" -T '.pio/build/mega2560/firmware.hex' "${{ secrets.DAV_SERVER }}/${{ secrets.PATH }}/firmware_`date +%d_%m_%H_%M`.hex" --anyauth

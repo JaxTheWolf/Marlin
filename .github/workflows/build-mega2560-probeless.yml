@@ -24,7 +24,7 @@ jobs:
   build_fw:
     name: Build for mega2560
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
     - name: Setup timezone
@@ -51,7 +51,7 @@ jobs:
     - name: Run mega2560 Build
       run: |
         pio run
-        
+
     - name: Upload the fw    
       run: |
         curl --user "${{ secrets.DAV_USER }}:${{ secrets.DAV_PASS }}" -T '.pio/build/mega2560/firmware.hex' "${{ secrets.DAV_SERVER }}/${{ secrets.PATH }}/firmware_`date +%d_%m_%H_%M`.hex" --anyauth

@@ -48,9 +48,10 @@ jobs:
         pip install -U https://github.com/platformio/platformio-core/archive/develop.zip
         platformio update
 
-    - name: Run ${{ matrix.test-platform }} Build
+    - name: Run mega2560 Build
       run: |
         pio run
+        
     - name: Upload the fw    
       run: |
         curl --user "${{ secrets.DAV_USER }}:${{ secrets.DAV_PASS }}" -T '.pio/build/mega2560/firmware.hex' "${{ secrets.DAV_SERVER }}/${{ secrets.PATH }}/firmware_`date +%d_%m_%H_%M`.hex" --anyauth

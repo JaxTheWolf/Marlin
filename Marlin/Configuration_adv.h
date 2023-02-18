@@ -32,7 +32,7 @@
  *
  * Basic settings can be found in Configuration.h
  */
-#define CONFIGURATION_ADV_H_VERSION 02010200
+#define CONFIGURATION_ADV_H_VERSION 02010300
 
 // @section develop
 
@@ -306,8 +306,8 @@
   #define THERMAL_PROTECTION_HYSTERESIS 4     // Degrees Celsius
 
   //#define ADAPTIVE_FAN_SLOWING              // Slow part cooling fan if temperature drops
-  #if BOTH(ADAPTIVE_FAN_SLOWING, PIDTEMP)
-    //#define NO_FAN_SLOWING_IN_PID_TUNING    // Don't slow fan speed during M303
+  #if ENABLED(ADAPTIVE_FAN_SLOWING) && EITHER(MPCTEMP, PIDTEMP)
+    //#define TEMP_TUNING_MAINTAIN_FAN        // Don't slow fan speed during M303 or M306 T
   #endif
 
   /**
@@ -377,7 +377,7 @@
 #endif
 
 #if ENABLED(PIDTEMP)
-  // Add an experimental additional term to the heater power, proportional to the extrusion speed.
+  // Add an additional term to the heater power, proportional to the extrusion speed.
   // A well-chosen Kc value should add just enough power to melt the increased material volume.
   //#define PID_EXTRUSION_SCALING
   #if ENABLED(PID_EXTRUSION_SCALING)
@@ -386,7 +386,7 @@
   #endif
 
   /**
-   * Add an experimental additional term to the heater power, proportional to the fan speed.
+   * Add an additional term to the heater power, proportional to the fan speed.
    * A well-chosen Kf value should add just enough power to compensate for power-loss from the cooling fan.
    * You can either just add a constant compensation with the DEFAULT_Kf value
    * or follow the instruction below to get speed-dependent compensation.
@@ -452,6 +452,9 @@
 //#define AUTOTEMP
 #if ENABLED(AUTOTEMP)
   #define AUTOTEMP_OLDWEIGHT    0.98  // Factor used to weight previous readings (0.0 < value < 1.0)
+  #define AUTOTEMP_MIN          210
+  #define AUTOTEMP_MAX          250
+  #define AUTOTEMP_FACTOR       0.1f
   // Turn on AUTOTEMP on M104/M109 by default using proportions set here
   //#define AUTOTEMP_PROPORTIONAL
   #if ENABLED(AUTOTEMP_PROPORTIONAL)
@@ -471,10 +474,10 @@
  * Thermistors able to support high temperature tend to have a hard time getting
  * good readings at room and lower temperatures. This means TEMP_SENSOR_X_RAW_LO_TEMP
  * will probably be caught when the heating element first turns on during the
- * preheating process, which will trigger a min_temp_error as a safety measure
+ * preheating process, which will trigger a MINTEMP error as a safety measure
  * and force stop everything.
  * To circumvent this limitation, we allow for a preheat time (during which,
- * min_temp_error won't be triggered) and add a min_temp buffer to handle
+ * MINTEMP error won't be triggered) and add a min_temp buffer to handle
  * aberrant readings.
  *
  * If you want to enable this feature for your hotend thermistor(s)
@@ -482,7 +485,7 @@
  */
 
 // The number of consecutive low temperature errors that can occur
-// before a min_temp_error is triggered. (Shouldn't be more than 10.)
+// before a MINTEMP error is triggered. (Shouldn't be more than 10.)
 //#define MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED 0
 
 /**
@@ -492,7 +495,8 @@
  * the minimum temperature your thermistor can read. The lower the better/safer.
  * This shouldn't need to be more than 30 seconds (30000)
  */
-//#define MILLISECONDS_PREHEAT_TIME 0
+//#define PREHEAT_TIME_HOTEND_MS 0
+//#define PREHEAT_TIME_BED_MS 0
 
 // @section extruder
 
@@ -540,6 +544,7 @@
 //#define USE_CONTROLLER_FAN
 #if ENABLED(USE_CONTROLLER_FAN)
   //#define CONTROLLER_FAN_PIN -1           // Set a custom pin for the controller fan
+  //#define CONTROLLER_FAN2_PIN -1          // Set a custom pin for second controller fan
   //#define CONTROLLER_FAN_USE_Z_ONLY       // With this option only the Z axis is considered
   //#define CONTROLLER_FAN_IGNORE_Z         // Ignore Z stepper. Useful when stepper timeout is disabled.
   #define CONTROLLERFAN_SPEED_MIN         0 // (0-255) Minimum speed. (If set below this value the fan is turned off.)
@@ -840,20 +845,20 @@
   //#define Z_MULTI_ENDSTOPS          // Other Z axes have their own endstops
   #if ENABLED(Z_MULTI_ENDSTOPS)
     #define Z2_USE_ENDSTOP   _XMAX_   // Z2 endstop board plug. Don't forget to enable USE_*_PLUG.
-    #define Z2_ENDSTOP_ADJUSTMENT 0   // Z2 offset relative to Y endstop
+    #define Z2_ENDSTOP_ADJUSTMENT 0   // Z2 offset relative to Z endstop
   #endif
   #ifdef Z3_DRIVER_TYPE
     //#define INVERT_Z3_VS_Z_DIR      // Z3 direction signal is the opposite of Z
     #if ENABLED(Z_MULTI_ENDSTOPS)
       #define Z3_USE_ENDSTOP   _YMAX_ // Z3 endstop board plug. Don't forget to enable USE_*_PLUG.
-      #define Z3_ENDSTOP_ADJUSTMENT 0 // Z3 offset relative to Y endstop
+      #define Z3_ENDSTOP_ADJUSTMENT 0 // Z3 offset relative to Z endstop
     #endif
   #endif
   #ifdef Z4_DRIVER_TYPE
     //#define INVERT_Z4_VS_Z_DIR      // Z4 direction signal is the opposite of Z
     #if ENABLED(Z_MULTI_ENDSTOPS)
       #define Z4_USE_ENDSTOP   _ZMAX_ // Z4 endstop board plug. Don't forget to enable USE_*_PLUG.
-      #define Z4_ENDSTOP_ADJUSTMENT 0 // Z4 offset relative to Y endstop
+      #define Z4_ENDSTOP_ADJUSTMENT 0 // Z4 offset relative to Z endstop
     #endif
   #endif
 #endif
@@ -1064,12 +1069,13 @@
  *
  * Zero Vibration (ZV) Input Shaping for X and/or Y movements.
  *
- * This option uses a lot of SRAM for the step buffer, which is proportional
- * to the largest step rate possible for any axis. If the build fails due to
- * low SRAM the buffer size may be reduced by setting smaller values for
- * DEFAULT_AXIS_STEPS_PER_UNIT and/or DEFAULT_MAX_FEEDRATE. Runtime editing
- * of max feedrate (M203) or resonant frequency (M593) may result feedrate
- * being capped to prevent buffer overruns.
+ * This option uses a lot of SRAM for the step buffer. The buffer size is
+ * calculated automatically from SHAPING_FREQ_[XY], DEFAULT_AXIS_STEPS_PER_UNIT,
+ * DEFAULT_MAX_FEEDRATE and ADAPTIVE_STEP_SMOOTHING. The default calculation can
+ * be overridden by setting SHAPING_MIN_FREQ and/or SHAPING_MAX_FEEDRATE.
+ * The higher the frequency and the lower the feedrate, the smaller the buffer.
+ * If the buffer is too small at runtime, input shaping will have reduced
+ * effectiveness during high speed movements.
  *
  * Tune with M593 D<factor> F<frequency>:
  *
@@ -1079,13 +1085,20 @@
  *  X<1>         Set the given parameters only for the X axis.
  *  Y<1>         Set the given parameters only for the Y axis.
  */
-//#define INPUT_SHAPING
-#if ENABLED(INPUT_SHAPING)
-  #define SHAPING_FREQ_X    40  // (Hz) The dominant resonant frequency of the X axis.
-  #define SHAPING_FREQ_Y    40  // (Hz) The dominant resonant frequency of the Y axis.
-  #define SHAPING_ZETA_X  0.3f  // Damping ratio of the X axis (range: 0.0 = no damping to 1.0 = critical damping).
-  #define SHAPING_ZETA_Y  0.3f  // Damping ratio of the Y axis (range: 0.0 = no damping to 1.0 = critical damping).
-  //#define SHAPING_MENU        // Add a menu to the LCD to set shaping parameters.
+//#define INPUT_SHAPING_X
+//#define INPUT_SHAPING_Y
+#if EITHER(INPUT_SHAPING_X, INPUT_SHAPING_Y)
+  #if ENABLED(INPUT_SHAPING_X)
+    #define SHAPING_FREQ_X  40          // (Hz) The default dominant resonant frequency on the X axis.
+    #define SHAPING_ZETA_X  0.15f       // Damping ratio of the X axis (range: 0.0 = no damping to 1.0 = critical damping).
+  #endif
+  #if ENABLED(INPUT_SHAPING_Y)
+    #define SHAPING_FREQ_Y  40          // (Hz) The default dominant resonant frequency on the Y axis.
+    #define SHAPING_ZETA_Y  0.15f       // Damping ratio of the Y axis (range: 0.0 = no damping to 1.0 = critical damping).
+  #endif
+  //#define SHAPING_MIN_FREQ  20        // By default the minimum of the shaping frequencies. Override to affect SRAM usage.
+  //#define SHAPING_MAX_STEPRATE 10000  // By default the maximum total step rate of the shaped axes. Override to affect SRAM usage.
+  //#define SHAPING_MENU                // Add a menu to the LCD to set shaping parameters.
 #endif
 
 #define AXIS_RELATIVE_MODES { false, false, false, false }
@@ -1407,6 +1420,9 @@
     //#define LCD_PRINTER_INFO_IS_BOOTSCREEN // Show bootscreen(s) instead of Printer Info pages
   #endif
 
+  // Add 50/100mm moves to MarlinUI even with a smaller bed
+  //#define LARGE_MOVE_ITEMS
+
   // BACK menu items keep the highlight at the top
   #define TURBO_BACK_MENU_ITEM
 
@@ -1415,12 +1431,10 @@
 
 #endif // HAS_MARLINUI_MENU
 
-#if ANY(HAS_DISPLAY, DWIN_LCD_PROUI, DWIN_CREALITY_LCD_JYERSUI)
+#if HAS_DISPLAY
   //#define SOUND_MENU_ITEM   // Add a mute option to the LCD menu
   #define SOUND_ON_DEFAULT    // Buzzer/speaker default enabled state
-#endif
 
-#if EITHER(HAS_DISPLAY, DWIN_LCD_PROUI)
   // The timeout to return to the status screen from sub-menus
   //#define LCD_TIMEOUT_TO_STATUS 15000   // (ms)
 
@@ -1442,6 +1456,9 @@
 
   // Show the E position (filament used) during printing
   //#define LCD_SHOW_E_TOTAL
+
+  // Display a negative temperature instead of "err"
+  //#define SHOW_TEMPERATURE_BELOW_ZERO
 
   /**
    * LED Control Menu
@@ -1469,27 +1486,29 @@
     #endif
   #endif
 
-#endif // HAS_DISPLAY || DWIN_LCD_PROUI
+#endif // HAS_DISPLAY
 
-// Add the G-code 'M73' to set / report the current job progress
+// Add 'M73' to set print job progress, overrides Marlin's built-in estimate
 #define SET_PROGRESS_MANUALLY
 #if ENABLED(SET_PROGRESS_MANUALLY)
-  #define SET_PROGRESS_PERCENT          // Add 'P' parameter to set percentage done, otherwise use Marlin's estimate
-  #define SET_REMAINING_TIME            // Add 'R' parameter to set remaining time, otherwise use Marlin's estimate
+  #define SET_PROGRESS_PERCENT            // Add 'P' parameter to set percentage done
+  #define SET_REMAINING_TIME              // Add 'R' parameter to set remaining time
   #define SET_INTERACTION_TIME          // Add 'C' parameter to set time until next filament change or other user interaction
-  #if ENABLED(SET_INTERACTION_TIME)
-    #define SHOW_INTERACTION_TIME         // Display time until next user interaction ('C' = filament change)
+  #define M73_REPORT                    // Report M73 values to host
+  #if BOTH(M73_REPORT, SDSUPPORT)
+    #define M73_REPORT_SD_ONLY            // Report only when printing from SD
   #endif
-  #define M73_REPORT                    // Report progress to host with 'M73'
 #endif
 
-// LCD Print Progress options, multiple can be rotated depending on screen layout
+// LCD Print Progress options. Multiple times may be displayed in turn.
 #if HAS_DISPLAY && EITHER(SDSUPPORT, SET_PROGRESS_MANUALLY)
   #define SHOW_PROGRESS_PERCENT           // Show print progress percentage (doesn't affect progress bar)
   #define SHOW_ELAPSED_TIME               // Display elapsed printing time (prefix 'E')
   #define SHOW_REMAINING_TIME           // Display estimated time to completion (prefix 'R')
-
-  #define PRINT_PROGRESS_SHOW_DECIMALS  // Show/report progress with decimal digits, not all UIs support this
+  #if ENABLED(SET_INTERACTION_TIME)
+    #define SHOW_INTERACTION_TIME         // Display time until next user interaction ('C' = filament change)
+  #endif
+  //#define PRINT_PROGRESS_SHOW_DECIMALS  // Show/report progress with decimal digits, not all UIs support this
 
   #if EITHER(HAS_MARLINUI_HD44780, IS_TFTGLCD_PANEL)
     #define LCD_PROGRESS_BAR            // Show a progress bar on HD44780 LCDs for SD printing
@@ -1864,11 +1883,11 @@
 
   #define DGUS_UPDATE_INTERVAL_MS  500    // (ms) Interval between automatic screen updates
 
-  #if ANY(DGUS_LCD_UI_FYSETC, DGUS_LCD_UI_MKS, DGUS_LCD_UI_HIPRECY)
+  #if DGUS_UI_IS(FYSETC, MKS, HIPRECY)
     #define DGUS_PRINT_FILENAME           // Display the filename during printing
     #define DGUS_PREHEAT_UI               // Display a preheat screen during heatup
 
-    #if EITHER(DGUS_LCD_UI_FYSETC, DGUS_LCD_UI_MKS)
+    #if DGUS_UI_IS(FYSETC, MKS)
       //#define DGUS_UI_MOVE_DIS_OPTION   // Disabled by default for FYSETC and MKS
     #else
       #define DGUS_UI_MOVE_DIS_OPTION     // Enabled by default for UI_HIPRECY
@@ -2084,7 +2103,7 @@
   #define BABYSTEP_ZPROBE_OFFSET          // Combine M851 Z and Babystepping
   #if ENABLED(BABYSTEP_ZPROBE_OFFSET)
     //#define BABYSTEP_HOTEND_Z_OFFSET      // For multiple hotends, babystep relative Z offsets
-    //#define BABYSTEP_ZPROBE_GFX_OVERLAY   // Enable graphical overlay on Z-offset editor
+    //#define BABYSTEP_GFX_OVERLAY          // Enable graphical overlay on Z-offset editor
   #endif
 #endif
 
@@ -2114,7 +2133,6 @@
   #endif
   //#define ADVANCE_K_EXTRA       // Add a second linear advance constant, configurable with M900 L.
   //#define LA_DEBUG              // Print debug information to serial during operation. Disable for production use.
-  //#define EXPERIMENTAL_SCURVE   // Allow S-Curve Acceleration to be used with LA.
   //#define ALLOW_LOW_EJERK       // Allow a DEFAULT_EJERK value of <10. Recommended for direct drive hotends.
   //#define EXPERIMENTAL_I2S_LA   // Allow I2S_STEPPER_STREAM to be used with LA. Performance degrades as the LA step rate reaches ~20kHz.
 #endif

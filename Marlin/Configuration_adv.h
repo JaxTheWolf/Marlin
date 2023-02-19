@@ -2484,7 +2484,7 @@
 #define SERIAL_OVERRUN_PROTECTION
 
 // For serial echo, the number of digits after the decimal point
-#define SERIAL_FLOAT_PRECISION 4
+#define SERIAL_FLOAT_PRECISION 3
 
 /**
  * Set the number of proportional font spaces required to fill up a typical character space.
@@ -2746,7 +2746,7 @@
 
   #if AXIS_IS_TMC_CONFIG(Y)
     #define Y_CURRENT       750
-    #define Y_CURRENT_HOME  Y_CURRENT
+    #define Y_CURRENT_HOME  650
     #define Y_MICROSTEPS     64
     #define Y_RSENSE          0.11
     #define Y_CHAIN_POS      -1
@@ -2765,8 +2765,8 @@
   #endif
 
   #if AXIS_IS_TMC_CONFIG(Z)
-    #define Z_CURRENT       800
-    #define Z_CURRENT_HOME  Z_CURRENT
+    #define Z_CURRENT       850
+    #define Z_CURRENT_HOME  750
     #define Z_MICROSTEPS     64
     #define Z_RSENSE          0.11
     #define Z_CHAIN_POS      -1
@@ -2776,7 +2776,7 @@
 
   #if AXIS_IS_TMC_CONFIG(Z2)
     #define Z2_CURRENT      Z_CURRENT
-    #define Z2_CURRENT_HOME Z2_CURRENT
+    #define Z2_CURRENT_HOME Z_CURRENT_HOME
     #define Z2_MICROSTEPS    Z_MICROSTEPS
     #define Z2_RSENSE         0.11
     #define Z2_CHAIN_POS     -1
@@ -2865,7 +2865,7 @@
   #endif
 
   #if AXIS_IS_TMC_CONFIG(E0)
-    #define E0_CURRENT      675
+    #define E0_CURRENT      690
     #define E0_MICROSTEPS    16
     #define E0_RSENSE         0.11
     #define E0_CHAIN_POS     -1

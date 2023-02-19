@@ -1312,7 +1312,7 @@
  *
  * See https://github.com/synthetos/TinyG/wiki/Jerk-Controlled-Motion-Explained
  */
-//#define S_CURVE_ACCELERATION
+#define S_CURVE_ACCELERATION
 
 //===========================================================================
 //============================= Z Probe Options =============================
@@ -1537,7 +1537,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { 35, 2, -0.9 }
+#define NOZZLE_TO_PROBE_OFFSET { 35, 2, -0.6 }
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -1547,10 +1547,10 @@
 #define XY_PROBE_FEEDRATE (133*60)
 
 // Feedrate (mm/min) for the first approach when double-probing (MULTIPLE_PROBING == 2)
-#define Z_PROBE_FEEDRATE_FAST (4*60)
+#define Z_PROBE_FEEDRATE_FAST (3*60)
 
 // Feedrate (mm/min) for the "accurate" probe of each point
-#define Z_PROBE_FEEDRATE_SLOW (Z_PROBE_FEEDRATE_FAST / 3)
+#define Z_PROBE_FEEDRATE_SLOW (Z_PROBE_FEEDRATE_FAST / 2)
 
 /**
  * Probe Activation Switch
@@ -1597,8 +1597,8 @@
  * A total of 2 does fast/slow probes with a weighted average.
  * A total of 3 or more adds more slow probes, taking the average.
  */
-#define MULTIPLE_PROBING 2
-//#define EXTRA_PROBING    1
+#define MULTIPLE_PROBING 3
+#define EXTRA_PROBING    1
 
 /**
  * Z probes require clearance when deploying, stowing, and moving between
@@ -1641,9 +1641,9 @@
  * These options are most useful for the BLTouch probe, but may also improve
  * readings with inductive probes and piezo sensors.
  */
-#define PROBING_HEATERS_OFF       // Turn heaters off when probing
+//#define PROBING_HEATERS_OFF    hhhhhhhh   // Turn heaters off when probing
 #if ENABLED(PROBING_HEATERS_OFF)
-  #define WAIT_FOR_BED_HEATER     // Wait for bed to heat back up between probes (to improve accuracy)
+  //#define WAIT_FOR_BED_HEATER     // Wait for bed to heat back up between probes (to improve accuracy)
   //#define WAIT_FOR_HOTEND         // Wait for hotend to heat back up between probes (to improve accuracy & prevent cold extrude)
 #endif
 #define PROBING_FANS_OFF          // Turn fans off when probing
@@ -1731,7 +1731,7 @@
 #define Z_HOMING_HEIGHT  4      // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
                                   // Be sure to have this much clearance over your Z_MAX_POS to prevent grinding.
 
-#define Z_AFTER_HOMING   5      // (mm) Height to move to after homing Z
+#define Z_AFTER_HOMING  5       // (mm) Height to move to after homing Z
 
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
@@ -2171,7 +2171,7 @@
 #endif
 
 // Homing speeds (linear=mm/min, rotational=°/min)
-#define HOMING_FEEDRATE_MM_M { (70*60), (70*60), (8*60) }
+#define HOMING_FEEDRATE_MM_M { (50*60), (50*60), (4*60) }
 
 // Validate that endstops are triggered on homing moves
 #define VALIDATE_HOMING_ENDSTOPS
@@ -2297,35 +2297,11 @@
 #define PREHEAT_2_TEMP_BED    100
 #define PREHEAT_2_FAN_SPEED     0 // Value from 0 to 255
 
-#define PREHEAT_3_LABEL       "PET"
-#define PREHEAT_3_TEMP_HOTEND 240 // PET
+#define PREHEAT_3_LABEL       "PETG"
+#define PREHEAT_3_TEMP_HOTEND 240
 #define PREHEAT_3_TEMP_BED     70
 #define PREHEAT_3_FAN_SPEED     0  
 
-#define PREHEAT_4_LABEL       "FLEX"
-#define PREHEAT_4_TEMP_HOTEND 240 // FLEX
-#define PREHEAT_4_TEMP_BED     50
-#define PREHEAT_4_FAN_SPEED     0 
-
-#define PREHEAT_5_LABEL       "PVA"
-#define PREHEAT_5_TEMP_HOTEND 230 // PVA
-#define PREHEAT_5_TEMP_BED     70
-#define PREHEAT_5_FAN_SPEED     0 
-
-#define PREHEAT_6_LABEL       "HIPS"
-#define PREHEAT_6_TEMP_HOTEND 220 // HIPS
-#define PREHEAT_6_TEMP_BED     80
-#define PREHEAT_6_FAN_SPEED     0 
-
-#define PREHEAT_7_LABEL       "PP"
-#define PREHEAT_7_TEMP_HOTEND 254 // PP
-#define PREHEAT_7_TEMP_BED    100
-#define PREHEAT_7_FAN_SPEED     0 
-
-#define PREHEAT_8_LABEL       "CUSTOM"
-#define PREHEAT_8_TEMP_HOTEND 200 // CUSTOM
-#define PREHEAT_8_TEMP_BED     70
-#define PREHEAT_8_FAN_SPEED     0 
 
 // @section motion
 
@@ -3400,7 +3376,7 @@
 #if ANY(RGB_LED, RGBW_LED, PCA9632)
   //#define RGB_STARTUP_TEST              // For PWM pins, fade between all colors
   #if ENABLED(RGB_STARTUP_TEST)
-    #define RGB_STARTUP_TEST_INNER_MS 5  // (ms) Reduce or increase fading speed
+    #define RGB_STARTUP_TEST_INNER_MS 6  // (ms) Reduce or increase fading speed
   #endif
 #endif
 

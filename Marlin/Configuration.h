@@ -619,14 +619,14 @@
 // Above this temperature the heater will be switched off.
 // This can protect components from overheating, but NOT from shorts and failures.
 // (Use MINTEMP for thermistor short/failure protection.)
-#define HEATER_0_MAXTEMP 300
-#define HEATER_1_MAXTEMP 300
-#define HEATER_2_MAXTEMP 300
-#define HEATER_3_MAXTEMP 300
-#define HEATER_4_MAXTEMP 300
-#define HEATER_5_MAXTEMP 300
-#define HEATER_6_MAXTEMP 300
-#define HEATER_7_MAXTEMP 300
+#define HEATER_0_MAXTEMP 285
+#define HEATER_1_MAXTEMP 285
+#define HEATER_2_MAXTEMP 285
+#define HEATER_3_MAXTEMP 285
+#define HEATER_4_MAXTEMP 285
+#define HEATER_5_MAXTEMP 285
+#define HEATER_6_MAXTEMP 285
+#define HEATER_7_MAXTEMP 285
 #define BED_MAXTEMP      150
 #define CHAMBER_MAXTEMP  60
 
@@ -2171,7 +2171,7 @@
 #endif
 
 // Homing speeds (linear=mm/min, rotational=°/min)
-#define HOMING_FEEDRATE_MM_M { (50*60), (50*60), (4*60) }
+#define HOMING_FEEDRATE_MM_M { (60*60), (60*60), (4*60) }
 
 // Validate that endstops are triggered on homing moves
 #define VALIDATE_HOMING_ENDSTOPS

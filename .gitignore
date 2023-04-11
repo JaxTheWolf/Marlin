@@ -32,27 +32,10 @@ calcskew.py
 
 #
 # OS
-#
 applet/
 .DS_Store
 
-#
-# Misc
-#
-*~
-*.orig
-*.rej
-*.bak
-*.idea
-*.i
-*.ii
-*.swp
-tags
-
-#
-# C++
-#
-# Compiled Object files
+# Compiled C++ Object files
 *.slo
 *.lo
 *.o
@@ -83,10 +66,7 @@ tags
 *.out
 *.app
 
-#
-# C
-#
-# Object files
+# Compiled C Object files
 *.o
 *.ko
 *.obj
@@ -146,13 +126,13 @@ vc-fileutils.settings
 .vscode/*
 !.vscode/extensions.json
 
-#Simulation
+# Simulation files
 imgui.ini
 eeprom.dat
 spi_flash.bin
 fs.img
 
-#cmake
+# CMake
 CMakeLists.txt
 src/CMakeLists.txt
 CMakeListsPrivate.txt
@@ -173,3 +153,16 @@ __pycache__
 
 # IOLogger logs
 *_log.csv
+
+# Misc.
+*~
+*.orig
+*.rej
+*.bak
+*.idea
+*.i
+*.ii
+*.swp
+tags
+*.logs
+*.bak

@@ -8,7 +8,7 @@ name: Build for Fysetc S6
 on:
   push:
     branches:
-    - leo_1S_S6
+    - leo_1S_S6_mpc 
     paths-ignore:
     - config/**
     - data/**
@@ -59,7 +59,7 @@ jobs:
         pio run -j7
     - name: Upload the fw    
       run: |
-        curl --user "${{ secrets.DAV_USER }}:${{ secrets.DAV_PASS }}" -T ".pio/build/FYSETC_S6_8000/firmware.bin" "${{ secrets.DAV_SERVER }}/${{ secrets.DAV_PATH }}/firmware_`date +%d_%m_%y_%H_%M`_1S_S6.bin" --anyauth
+        curl --user "${{ secrets.DAV_USER }}:${{ secrets.DAV_PASS }}" -T ".pio/build/FYSETC_S6_8000/firmware.bin" "${{ secrets.DAV_SERVER }}/${{ secrets.DAV_PATH }}/firmware_`date +%d_%m_%y_%H_%M`_1S_S6_MPC.bin" --anyauth
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:

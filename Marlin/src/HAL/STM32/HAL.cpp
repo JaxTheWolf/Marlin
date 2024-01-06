@@ -167,7 +167,19 @@ extern "C" {
 }
 
 // Reset the system to initiate a firmware flash
-WEAK void flashFirmware(const int16_t) { hal.reboot(); }
+// WEAK void flashFirmware(const int16_t) { hal.reboot(); }
+WEAK void flashFirmware(const int16_t) {
+    HAL_RCC_DeInit();
+    HAL_DeInit();
+    __HAL_REMAPMEMORY_SYSTEMFLASH();
+    // arm-none-eabi-gcc 4.9.0 does not correctly inline this
+    // MSP function, so we write it out explicitly here.
+    //__set_MSP(*((uint32_t*) 0x00000000));
+    __ASM volatile ("movs r3, #0\nldr r3, [r3, #0]\nMSR msp, r3\n" : : : "r3");//, "sp");
+    ((void (*)(void)) *((uint32_t*) 0x00000004))();
+    // This will never be executed
+    hal.reboot();
+}
 
 // Maple Compatibility
 volatile uint32_t systick_uptime_millis = 0;

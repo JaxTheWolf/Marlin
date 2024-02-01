@@ -1234,7 +1234,7 @@
  * Override with M92 (when enabled below)
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 320, 320, 1608.9, 409 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 320.77, 320.68, 1608.9, 409 }
 
 /**
  * Enable support for M92. Disable to save at least ~530 bytes of flash.
@@ -2095,7 +2095,7 @@
    * contours of the bed more closely than edge-to-edge straight moves.
    */
   #define SEGMENT_LEVELED_MOVES
-  #define LEVELED_SEGMENT_LENGTH 5.0 // (mm) Length of all segments (except the last one)
+  #define LEVELED_SEGMENT_LENGTH 2 // (mm) Length of all segments (except the last one)
 
   /**
    * Enable the G26 Mesh Validation Pattern tool.
@@ -2317,14 +2317,14 @@
 
 #if ENABLED(SKEW_CORRECTION)
   // Input all length measurements here:
-  #define XY_DIAG_AC 70.49
-  #define XY_DIAG_BD 70.50
-  #define XY_SIDE_AD 49.94
+  #define XY_DIAG_AC 99.99
+  #define XY_DIAG_BD 99.71
+  #define XY_SIDE_AD 70.5404
 
   // Or, set the XY skew factor directly:
   //#define XY_SKEW_FACTOR 0.0
 
-  #define SKEW_CORRECTION_FOR_Z
+  //#define SKEW_CORRECTION_FOR_Z
   #if ENABLED(SKEW_CORRECTION_FOR_Z)
     #define XZ_DIAG_AC 70.15
     #define XZ_DIAG_BD 70.12

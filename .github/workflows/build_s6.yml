@@ -14,6 +14,7 @@ on:
     - data/**
     - docs/**
     - '**/*.md'
+  workflow_dispatch:
 
 jobs:
   build_fw:

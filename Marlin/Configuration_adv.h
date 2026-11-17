@@ -1842,6 +1842,7 @@
    * :['SPI_HALF_SPEED', 'SPI_QUARTER_SPEED', 'SPI_EIGHTH_SPEED']
    */
   //#define SD_SPI_SPEED SPI_HALF_SPEED
+  #define SDCARD_COMMANDS_SPLIT
 
   /**
    * Reinit the LCD after SD Card insert/remove or when entering the menu.
@@ -5027,7 +5028,7 @@
 //
 // M43 - display pin status, toggle pins, watch pins, watch endstops & toggle LED, test servo probe
 //
-//#define PINS_DEBUGGING
+#define PINS_DEBUGGING
 
 //
 // M265 - I2C Scanner
